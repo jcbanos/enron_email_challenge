@@ -48,12 +48,10 @@ func main() {
 		log.Fatal("The number of args should be 2.")
 	}
 
+	// Create router and add handlers
 	zincsearchUrl = "http://" + os.Args[1] + ":5080/api/default/_search"
-
 	r := chi.NewRouter()
-
 	r.Get("/*", handleHomePage)
-
 	r.Get("/search", handleSearchRequest)
 
 	// Start the server.
@@ -64,6 +62,7 @@ func main() {
 }
 
 func handleHomePage(w http.ResponseWriter, r *http.Request) {
+	// Serve the homepage
 	workDir, _ := os.Getwd()
 	filesDir := filepath.Join(workDir, "frontend", "dist")
 	if _, err := os.Stat(filesDir + r.URL.Path); errors.Is(err, os.ErrNotExist) {

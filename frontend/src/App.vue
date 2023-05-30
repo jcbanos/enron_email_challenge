@@ -1,4 +1,5 @@
 <template>
+  <!---------------------------------------- Start Nav ----------------------------------------------------------------->
   <nav class="bg-slate-200 w-full flex relative justify-start items-center mx-auto px-8 h-16">
       <!-- logo -->
       <div class="inline-flex">
@@ -23,6 +24,9 @@
       </div>
   </nav>
 
+    <!---------------------------------------- End Nav ----------------------------------------------------------------->
+    <!---------------------------------------- Start searchbar ---------------------------------------------------------->
+
   <form class='max-w-md mx-auto mt-4 border-solid border rounded-lg border-slate-200' id="search-form" @submit.prevent="searchQuery">
     <div class="relative flex items-center w-full h-12 rounded-lg focus-within:shadow-lg bg-white overflow-hidden">
       <button type="submit" form="search-form" class="focus:outline-none">
@@ -39,6 +43,9 @@
         placeholder="Search something.." v-model="searchTerm" /> 
     </div>
   </form>
+
+  <!---------------------------------------- End searchbar ---------------------------------------------------------->
+  <!---------------------------------------- Start grid ------------------------------------------------------------->
 
 <div class="grid grid-cols-2 gap-3 pt-3">
   <div class="flex flex-col">
@@ -88,16 +95,15 @@
       </div>
     </div>
   </div>
-  
+
   <div class="flex flex-col">
     <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8  overflow-y-auto overflow-x-hidden max-h-[22rem]">
       <p>{{ date }}</p>
       <p class="text-left">{{content}}</p>
     </div>
-
   </div>
 </div>
-
+<!---------------------------------------- End grid ------------------------------------------------------------->
 </template>
 <script>
   import axios from 'axios';

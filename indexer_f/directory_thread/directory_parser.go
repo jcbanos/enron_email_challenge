@@ -10,23 +10,22 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type Email struct {
-	Subject string
-	From    string
-	To      string
-	Date    string
-	Content string
+	Subject []byte
+	From    []byte
+	To      []byte
+	Date    []byte
+	Content []byte
 }
 
 func NewEmail() Email {
 	email := Email{}
-	email.Subject = "Not available"
-	email.From = "Not available"
-	email.To = "Not available"
-	email.Date = "Not available"
+	email.Subject = []byte("Not available")
+	email.From = []byte("Not available")
+	email.To = []byte("Not available")
+	email.Date = []byte("Not available")
 	return email
 }
 
@@ -78,7 +77,7 @@ func parseEmailFileToJson(emailPath string) Email {
 	index := bytes.Index(file_bytes, []byte("\r\n\r\n"))
 	header := file_bytes[:index]
 	content := file_bytes[index:]
-	email.Content = strings.TrimSpace(string(content))
+	email.Content = content
 	headerParts := bytes.Split(header, []byte("\r\n"))
 	subject_bytes := []byte("Subject:")
 	fromBytes := []byte("From:")
@@ -86,17 +85,13 @@ func parseEmailFileToJson(emailPath string) Email {
 	dateBytes := []byte("Date:")
 	for _, header := range headerParts {
 		if bytes.HasPrefix(header, subject_bytes) {
-			subject := strings.TrimSpace(strings.TrimPrefix(string(header), "Subject:"))
-			email.Subject = subject
+			email.Subject = header
 		} else if bytes.HasPrefix(header, fromBytes) {
-			from := strings.TrimSpace(strings.TrimPrefix(string(header), "From:"))
-			email.From = from
+			email.From = header
 		} else if bytes.HasPrefix(header, toBytes) {
-			to := strings.TrimSpace(strings.TrimPrefix(string(header), "To:"))
-			email.To = to
+			email.To = header
 		} else if bytes.HasPrefix(header, dateBytes) {
-			date := strings.TrimSpace(strings.TrimPrefix(string(header), "Date:"))
-			email.Date = date
+			email.Date = header
 		}
 	}
 	return email
@@ -111,7 +106,8 @@ func sendEmails(emails []Email, zincapi string) {
 	}
 
 	// Create request and send it
-	req, err := http.NewRequest("POST", zincapi, strings.NewReader(string(jsonEmails)))
+	// Optimization #5 Instead of using a string reader, use byte buffer to prevent string conversions
+	req, err := http.NewRequest("POST", zincapi, bytes.NewBuffer(jsonEmails))
 	if err != nil {
 		log.Fatal(err)
 	}
