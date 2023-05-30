@@ -40,12 +40,12 @@
     </div>
   </form>
 
-<div class="grid grid-cols-2 gap-3">
+<div class="grid grid-cols-2 gap-3 pt-3">
   <div class="flex flex-col">
     <div class="sm:mx-0.5 lg:mx-0.5">
       <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
         <div class="overflow-y-auto overflow-x-hidden max-h-[22rem]">
-          <table class="min-w-full">
+          <table class="w-128 fixed-table">
             <thead class="bg-white border-b">
               <tr>
                 <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-center">
@@ -59,53 +59,29 @@
                 </th>
               </tr>
             </thead>
-            <tbody>
-              <tr class="bg-gray-100 border-b hover:scale-105 hover:cursor-pointer">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">1</td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Mark
-                </td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Otto
-                </td>
-              </tr>
-              <tr class="bg-white border-b hover:scale-105 hover:cursor-pointer">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2</td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Jacob
-                </td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Dillan
-                </td>
-              </tr>
-              <tr class="bg-gray-100 border-b hover:scale-105 hover:cursor-pointer">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">3</td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Mark
-                </td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Twen
-                </td>
-              </tr>    
-              <tr class="bg-white border-b hover:scale-105 hover:cursor-pointer">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">4</td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Bob
-                </td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Dillan
-                </td>
-              </tr>
-
-              <tr class="bg-white border-b hover:scale-105 hover:cursor-pointer">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">4</td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Bob
-                </td>
-                <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  Dillan
-                </td>
-              </tr>
+            <tbody v-for="(email, index) in emails" :key="email">
+              <template v-if="index%2===0">
+                <tr v-bind:data-content="email.Content" v-bind="dataAttributes(email.Content, email.Date)" class="bg-white border-b hover:scale-105 hover:cursor-pointer" @click="showContent">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900  w-28"><div class="w-28 overflow-hidden">{{email.Subject}}</div></td>
+                  <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap  w-28">
+                    <div class="w-28 overflow-hidden">{{email.From}}</div>
+                  </td>
+                  <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap overflow:hidden w-28">
+                    <div class="w-28 overflow-hidden">{{ email.To }}</div>
+                  </td>
+                </tr>
+              </template>
+              <template v-else>
+                <tr v-bind:data-content="email.Content" class="bg-gray-100 border-b hover:scale-105 hover:cursor-pointer" @click="showContent">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900  w-28"><div class="w-28 overflow-hidden" @click.stop>{{email.Subject}}</div></td>
+                  <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap  w-28">
+                    <div class="w-28 overflow-hidden">{{email.From}}</div>
+                  </td>
+                  <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap overflow:hidden w-28">
+                    <div class="w-28 overflow-hidden">{{ email.To }}</div>
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
@@ -114,17 +90,17 @@
   </div>
   
   <div class="flex flex-col">
-    <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
-      <p class="text-sm font-medium text-gray-900 px-6 py-4 text-center">Content</p>
-      <p></p>
+    <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8  overflow-y-auto overflow-x-hidden max-h-[22rem]">
+      <p>{{ date }}</p>
+      <p class="text-left">{{content}}</p>
     </div>
 
   </div>
 </div>
 
-
 </template>
 <script>
+  import axios from 'axios';
 
   export default {
     name: 'App',
@@ -132,13 +108,34 @@
     data() { return {
       searchTerm: '',
       emails: [],
-      content: "" 
+      content: "",
+      date: ""
     } },
 
     methods: {
-      async searchQuery() {
-        const response = await fetch("http://localhost:3000/search?" + new URLSearchParams({searchTerm: this.searchTerm}));
-        console.log(response)
+      searchQuery() {
+        axios.get(window.location.origin + "/search", {
+          params: {
+            searchTerm: this.searchTerm
+          }
+        })
+        .then((response) => {
+          console.log(response.data)
+          this.emails = response.data
+        })
+        .catch((error) => {
+          window.alert(`The API returned an error: ${error}`);
+        })
+      },
+      showContent(event){
+        this.content = event.currentTarget.dataset.content
+        this.date = event.currentTarget.dataset.date
+      },
+      dataAttributes(content, date){
+        return {
+          "data-content": content,
+          "data-date": date
+        }
       }
     }
   }
