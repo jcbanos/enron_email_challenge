@@ -1,4 +1,4 @@
-module test_server
+module enron_email_challenge
 
 go 1.18
 
