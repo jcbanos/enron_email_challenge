@@ -10,22 +10,24 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Email struct {
-	Subject []byte
-	From    []byte
-	To      []byte
-	Date    []byte
-	Content []byte
+	Subject string
+	From    string
+	To      string
+	Date    string
+	Content string
 }
 
 func NewEmail() Email {
 	email := Email{}
-	email.Subject = []byte("Not available")
-	email.From = []byte("Not available")
-	email.To = []byte("Not available")
-	email.Date = []byte("Not available")
+	email.Subject = "Not available"
+	email.From = "Not available"
+	email.To = "Not available"
+	email.Date = "Not available"
+	email.Content = "Not available"
 	return email
 }
 
@@ -77,7 +79,7 @@ func parseEmailFileToJson(emailPath string) Email {
 	index := bytes.Index(file_bytes, []byte("\r\n\r\n"))
 	header := file_bytes[:index]
 	content := file_bytes[index:]
-	email.Content = content
+	email.Content = strings.TrimSpace(string(content))
 	headerParts := bytes.Split(header, []byte("\r\n"))
 	subject_bytes := []byte("Subject:")
 	fromBytes := []byte("From:")
@@ -85,13 +87,13 @@ func parseEmailFileToJson(emailPath string) Email {
 	dateBytes := []byte("Date:")
 	for _, header := range headerParts {
 		if bytes.HasPrefix(header, subject_bytes) {
-			email.Subject = header
+			email.Subject = strings.TrimSpace(strings.TrimPrefix(string(header), "Subject:"))
 		} else if bytes.HasPrefix(header, fromBytes) {
-			email.From = header
+			email.From = strings.TrimSpace(strings.TrimPrefix(string(header), "From:"))
 		} else if bytes.HasPrefix(header, toBytes) {
-			email.To = header
+			email.To = strings.TrimSpace(strings.TrimPrefix(string(header), "To:"))
 		} else if bytes.HasPrefix(header, dateBytes) {
-			email.Date = header
+			email.Date = strings.TrimSpace(strings.TrimPrefix(string(header), "Date:"))
 		}
 	}
 	return email
